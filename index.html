@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Ensaios - Murillo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:15px;background:linear-gradient(180deg,#000,#111);color:white;font-family:Arial,Helvetica,sans-serif;text-align:center}
+h1{color:#00ff66;margin-bottom:8px} h2{color:#00ff66}.card{background:#111;border:1px solid #00ff66;border-radius:14px;padding:15px;margin:14px auto;max-width:1000px;box-shadow:0 0 10px rgba(0,255,102,.25)}
+#relogio{font-size:30px;font-weight:bold;color:#00ff66;margin:10px 0}.alerta{margin:12px auto;padding:15px;border-radius:12px;border:2px solid #00ff66;font-size:20px;font-weight:bold;color:#00ff66;animation:piscar 1.2s infinite}@keyframes piscar{0%{opacity:1}50%{opacity:.65}100%{opacity:1}}
+input,textarea,button,select{width:95%;max-width:430px;padding:11px;margin:5px;border-radius:8px;border:none;font-size:15px}input,textarea,select{background:#f4f4f4;color:#000}textarea{height:70px;resize:vertical}button{background:#00aa44;color:white;font-weight:bold;cursor:pointer}button:hover{background:#00cc55}.btn-red{background:#aa0000}.btn-red:hover{background:#cc0000}.btn-blue{background:#005bbb}.btn-blue:hover{background:#0077ee}.btn-gold{background:#b8860b}.btn-gold:hover{background:#daa520}
+.resumo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}.boxResumo{background:#050505;border:1px solid gold;border-radius:10px;padding:10px}.boxResumo strong{display:block;font-size:24px;color:#00ff66;margin-top:5px}
+table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px}th,td{border:1px solid #555;padding:8px;vertical-align:middle}th{background:#222;color:#00ff66}.pequeno{font-size:13px;color:#ccc}.ok{color:#00ff66;font-weight:bold}.barra{background:#333;border-radius:20px;overflow:hidden;height:22px;min-width:100px}.progresso{height:100%;background:#00ff66;color:#000;font-weight:bold;font-size:12px;line-height:22px;min-width:28px}
+.linha-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;align-items:end}.linha-form input,.linha-form textarea{width:100%;max-width:none}.scroll{overflow-x:auto}
+@media(max-width:600px){body{padding:10px}#relogio{font-size:22px}.alerta{font-size:16px}table{font-size:12px}th,td{padding:6px}input,textarea,button,select{font-size:14px;padding:10px}}
+@media print{button,input,textarea,select,.no-print{display:none!important}body{background:white;color:black}.card{background:white;color:black;border:1px solid black;box-shadow:none}h1,h2,h3,th{color:black}th{background:#eee}.ok{color:black}.alerta{border:1px solid black;color:black;animation:none}.barra{border:1px solid #000;background:white}.progresso{background:#ddd;color:black}}
+</style>
+</head>
+<body>
+<h1>🕺 Controle de Ensaios</h1>
+<p class="pequeno">Murillo — presença, horas de ensaio e andamento das músicas</p>
+
+<div class="card"><h2>Dançarino</h2><input type="text" value="Murillo" readonly></div>
+
+<div class="card"><h2>Relógio em Tempo Real</h2><div id="relogio"></div><div class="alerta">🕺 MURILLO - DISPONÍVEL PARA ENSAIOS</div></div>
+
+<div class="card"><h2>✅ Registrar Presença</h2><textarea id="observacaoPresenca" placeholder="Observação do ensaio ou presença"></textarea><button onclick="registrarPresenca()">✅ Registrar Presença</button></div>
+
+<div class="card"><h2>📊 Resumo Geral</h2><div class="resumo-grid" id="resumo"></div></div>
+
+<div class="card"><h2>📅 Horários Livres para Ensaios</h2><p class="pequeno">Marque os dias disponíveis e salve os horários livres.</p><div class="scroll"><table><thead><tr><th>Dia</th><th>Disponível</th><th>Início</th><th>Final</th><th>Observação</th></tr></thead><tbody id="agendaEnsaios"></tbody></table></div><button onclick="salvarAgenda()">💾 Salvar Horários Livres</button></div>
+
+<div class="card"><h2>🎵 Andamento das Músicas</h2><div class="linha-form no-print"><input id="musicaNome" placeholder="Nome da música: Jam"><input id="musicaTotal" placeholder="Tempo total: 05:40"><input id="musicaFeito" placeholder="Tempo feito: 03:20"><textarea id="musicaObs" placeholder="Observação da coreografia"></textarea></div><button class="no-print" onclick="adicionarMusica()">➕ Adicionar / Salvar Música</button><div class="scroll"><table><thead><tr><th>Música</th><th>Tempo Total</th><th>Tempo Feito</th><th>Falta</th><th>Conclusão</th><th>Observação</th><th class="no-print">Ação</th></tr></thead><tbody id="tabelaMusicas"></tbody></table></div></div>
+
+<div class="card"><h2>⏱️ Horas de Ensaio Realizadas</h2><div class="linha-form no-print"><input type="date" id="horaData"><input id="horaFeita" placeholder="Horas feitas: 2:30 ou 2h"><textarea id="horaDesc" placeholder="Descrição: músicas ensaiadas, limpeza, marcação"></textarea></div><button class="no-print" onclick="adicionarHora()">➕ Adicionar Horas</button><div class="scroll"><table><thead><tr><th>Data</th><th>Horas Feitas</th><th>Descrição</th><th class="no-print">Ação</th></tr></thead><tbody id="tabelaHoras"></tbody></table></div></div>
+
+<div class="card"><h2>📌 Histórico de Presenças</h2><button class="btn-blue" onclick="window.print()">📄 Salvar / Imprimir em PDF</button><button class="btn-red" onclick="limparTudo()">🗑️ Limpar Histórico</button><div class="scroll"><table><thead><tr><th>Data</th><th>Hora</th><th>Presença</th><th>Observação</th></tr></thead><tbody id="historicoTabela"></tbody></table></div></div>
+
+<script>
+const K_PRESENCA='murillo_presencas_simples_v1', K_AGENDA='murillo_agenda_ensaios_v1', K_MUSICAS='murillo_musicas_v1', K_HORAS='murillo_horas_ensaio_v1';
+let presencas=JSON.parse(localStorage.getItem(K_PRESENCA))||[];
+let musicas=JSON.parse(localStorage.getItem(K_MUSICAS))||[];
+let horas=JSON.parse(localStorage.getItem(K_HORAS))||[];
+const dias=['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado','Domingo'];
+function dois(n){return String(n).padStart(2,'0')} function dataBR(d){return d.toLocaleDateString('pt-BR')} function horaBR(d){return dois(d.getHours())+':'+dois(d.getMinutes())}
+function atualizarRelogio(){const a=new Date();document.getElementById('relogio').innerHTML=dataBR(a)+' - '+a.toLocaleTimeString('pt-BR')} setInterval(atualizarRelogio,1000); atualizarRelogio();
+function parseTempo(txt){if(!txt)return 0;txt=String(txt).toLowerCase().trim().replace('h',':').replace('min','');let p=txt.split(':'); if(p.length===1)return Math.round(Number(p[0].replace(',','.'))*60)||0; return (Number(p[0])||0)*60+(Number(p[1])||0)}
+function fmtTempo(min){min=Math.max(0,Math.round(min));return Math.floor(min/60)+':'+dois(min%60)}
+function registrarPresenca(){const a=new Date();presencas.push({data:dataBR(a),hora:horaBR(a),status:'✅ Presente',obs:document.getElementById('observacaoPresenca').value.trim()||'-'});localStorage.setItem(K_PRESENCA,JSON.stringify(presencas));document.getElementById('observacaoPresenca').value='';render()}
+function montarAgenda(){let salvo=JSON.parse(localStorage.getItem(K_AGENDA))||dias.map(d=>({dia:d,disp:false,inicio:'',fim:'',obs:''}));document.getElementById('agendaEnsaios').innerHTML=salvo.map((i,idx)=>`<tr><td>${i.dia}</td><td><input type="checkbox" data-ag="disp" data-i="${idx}" ${i.disp?'checked':''}></td><td><input type="time" data-ag="inicio" data-i="${idx}" value="${i.inicio||''}"></td><td><input type="time" data-ag="fim" data-i="${idx}" value="${i.fim||''}"></td><td><input data-ag="obs" data-i="${idx}" value="${i.obs||''}" placeholder="Observação"></td></tr>`).join('')}
+function salvarAgenda(){let linhas=[...document.querySelectorAll('#agendaEnsaios tr')];let dados=linhas.map(l=>({dia:l.cells[0].innerText,disp:l.cells[1].querySelector('input').checked,inicio:l.cells[2].querySelector('input').value,fim:l.cells[3].querySelector('input').value,obs:l.cells[4].querySelector('input').value}));localStorage.setItem(K_AGENDA,JSON.stringify(dados));alert('Horários livres salvos!')}
+function adicionarMusica(){let nome=document.getElementById('musicaNome').value.trim(); if(!nome){alert('Digite o nome da música.');return} let total=document.getElementById('musicaTotal').value.trim(), feito=document.getElementById('musicaFeito').value.trim(), obs=document.getElementById('musicaObs').value.trim(); let idx=musicas.findIndex(m=>m.nome.toLowerCase()===nome.toLowerCase()); let item={nome,total,feito,obs}; if(idx>=0)musicas[idx]=item; else musicas.push(item); localStorage.setItem(K_MUSICAS,JSON.stringify(musicas)); ['musicaNome','musicaTotal','musicaFeito','musicaObs'].forEach(id=>document.getElementById(id).value=''); render()}
+function removerMusica(i){if(confirm('Remover esta música?')){musicas.splice(i,1);localStorage.setItem(K_MUSICAS,JSON.stringify(musicas));render()}}
+function adicionarHora(){let data=document.getElementById('horaData').value||new Date().toISOString().slice(0,10); let feita=document.getElementById('horaFeita').value.trim(); if(!feita){alert('Digite as horas feitas.');return} let desc=document.getElementById('horaDesc').value.trim()||'-'; horas.push({data:data.split('-').reverse().join('/'),feita,desc}); localStorage.setItem(K_HORAS,JSON.stringify(horas)); ['horaData','horaFeita','horaDesc'].forEach(id=>document.getElementById(id).value=''); render()}
+function removerHora(i){if(confirm('Remover este registro de horas?')){horas.splice(i,1);localStorage.setItem(K_HORAS,JSON.stringify(horas));render()}}
+function renderMusicas(){let tb=document.getElementById('tabelaMusicas'); if(!musicas.length){tb.innerHTML='<tr><td colspan="7">Nenhuma música cadastrada.</td></tr>';return} tb.innerHTML=musicas.map((m,i)=>{let total=parseTempo(m.total),feito=parseTempo(m.feito),falta=Math.max(0,total-feito),perc=total?Math.min(100,Math.round((feito/total)*100)):0;return `<tr><td>${m.nome}</td><td>${m.total||'0:00'}</td><td>${m.feito||'0:00'}</td><td>${fmtTempo(falta)}</td><td><div class="barra"><div class="progresso" style="width:${perc}%">${perc}%</div></div></td><td>${m.obs||'-'}</td><td class="no-print"><button class="btn-red" onclick="removerMusica(${i})">Excluir</button></td></tr>`}).join('')}
+function renderHoras(){let tb=document.getElementById('tabelaHoras'); if(!horas.length){tb.innerHTML='<tr><td colspan="4">Nenhuma hora de ensaio cadastrada.</td></tr>';return} tb.innerHTML=horas.map((h,i)=>`<tr><td>${h.data}</td><td>${h.feita}</td><td>${h.desc}</td><td class="no-print"><button class="btn-red" onclick="removerHora(${i})">Excluir</button></td></tr>`).join('')}
+function renderPresencas(){let tb=document.getElementById('historicoTabela'); if(!presencas.length){tb.innerHTML='<tr><td colspan="4">Nenhuma presença registrada.</td></tr>';return} tb.innerHTML=presencas.map(p=>`<tr><td>${p.data}</td><td>${p.hora}</td><td class="ok">${p.status}</td><td>${p.obs}</td></tr>`).join('')}
+function atualizarResumo(){let totalMin=horas.reduce((s,h)=>s+parseTempo(h.feita),0);let concluidas=musicas.filter(m=>parseTempo(m.total)>0 && parseTempo(m.feito)>=parseTempo(m.total)).length;let andamento=musicas.length-concluidas;let diasUnicos=new Set(horas.map(h=>h.data)).size;document.getElementById('resumo').innerHTML=`<div class="boxResumo">Presenças<strong>${presencas.length}</strong></div><div class="boxResumo">Horas Ensaiadas<strong>${fmtTempo(totalMin)}</strong></div><div class="boxResumo">Dias de Ensaio<strong>${diasUnicos}</strong></div><div class="boxResumo">Músicas Concluídas<strong>${concluidas}</strong></div><div class="boxResumo">Músicas em Andamento<strong>${andamento}</strong></div>`}
+function limparTudo(){if(confirm('Deseja apagar presenças, músicas e horas salvas?')){presencas=[];musicas=[];horas=[];localStorage.removeItem(K_PRESENCA);localStorage.removeItem(K_MUSICAS);localStorage.removeItem(K_HORAS);render()}}
+function render(){renderPresencas();renderMusicas();renderHoras();atualizarResumo()}
+montarAgenda(); render();
+</script>
+</body>
+</html>
